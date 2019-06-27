@@ -1,0 +1,92 @@
+CURL:PHP
+======
+-Locate your PHP.ini file
+-Open the PHP.ini in notepad
+-Search or find the following : ';extension=php_curl.dll'
+-Uncomment this by removing the semi-colon ';' before it.
+-Save and Close PHP.ini.
+-Restart Apache
+
+
+-Using command to get and start.
+CMD:
+apt-get install php5-curl
+/etc/init.d/apache2 restart
+
+LINUX:
+sudo apt-get install php5-curl
+sudo /etc/init.d/apache2 restart
+
+
+function fCallApi($url, $data, $httpReferer)
+{		
+	$ch = curl_init();// initiate curl
+	
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_POST, true);  // tell curl you want to post something
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data); // define what you want to post
+	curl_setopt($ch, CURLOPT_REFERER, $httpReferer);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // return the output in string format
+		
+	$output = curl_exec ($ch); // execute
+	curl_close ($ch);
+
+	return $output;
+	
+	or 
+	
+	$url = "http://www.example.com/";
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_POST, true);
+
+	$data = array(
+		'username' => 'foo',
+		'password' => 'bar'
+	);
+
+
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+	$contents = curl_exec($ch);
+	curl_close($ch);
+
+
+}
+--------------
+
+Using JSON DATA with CURL
+
+client.php
+
+    <?php 
+
+$url="http://192.168.44.10/project/server/curl_server.php";
+$data=['username'=>'abc','password'=>'123'];
+$data = json_encode($data);
+
+$ch = curl_init();
+$curlConfig = array(
+    CURLOPT_URL            => $url,
+    CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+    CURLOPT_POST           => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POSTFIELDS     => $data
+);
+curl_setopt_array($ch, $curlConfig);
+$result = curl_exec($ch);
+curl_close($ch);
+echo $result;  //here you get result like: username: abc and password: 123
+?>
+
+curl_server.php
+
+    <?php
+
+    $data = file_get_contents('php://input');
+    $Data= json_decode($data,true);
+
+    echo 'username: '.$Data['username']." and password: ".$Data['password'];
+?>
+---------------------
+Link example: http://codepad.org/YE6fyzCA
