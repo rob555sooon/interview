@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Nabler</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <style>
+  .footer-page{
+  padding:1rem 2rem !important;
+  }
+  .info-content{
+	background: rgba(242, 242, 242, 0.65);
+	width:100%;
+	height:auto;
+	overflow: hidden;
+	border-radius: 25px;
+  }
+	.galary{
+		float:left;
+		width:15%;
+		position: relative;	
+	}	
+  </style>
+</head>
+<body>
+	<div class="jumbotron text-center logo-img-load" style="margin-bottom:0">	
+		<h1>Student Registration</h1>
+	</div>
+
+	<div id="wrapper" class="container info-content" style="margin-top:30px;margin-bottom:30px;" class="col-lg-12 col-md-12 col-sm-12">
+		<div class="row">
+			<div class="col-lg-12 col-md-3 col-sm-3 galary">
+				<div>
+					<label>Batch Name :</label>
+					<select id="batchname">
+						<option selected>2017</option>
+						<option>2018</option>
+						<option>2019</option>
+					</select>
+					<input type="button" id="addData" name="submitdata" value="+"/>
+				</div>
+				<div id="studentdatacont">
+					<table id="studentdatarow">
+					</table>
+				</div>
+				<div>
+					<input type="button" class="button submit" value="Submit">
+					<input type="file" id="uploadfiles" name='file[]' value="Submit" multiple="multiple"/>
+					<img src="" style="display:none;" id="uploadimg" />
+				</div>
+				<div id="upfilelist"></div>
+			</div>
+			<div class="col-lg-12 col-md-3 col-sm-3">
+				<div id="table-cont">
+					<table id="datatable" class="c">
+						<thead>
+							<tr>
+								<th>Sl.no</th>
+								<th>Batchname</th>
+								<th>Student Name</th>
+								<th>Email</th>
+								<th>Contact Number</th>
+								<th>Action</th>
+								<th>Delete</th>
+							</tr>
+						</thead>
+						<tbody id="displaydata"></tbody>
+					</table>
+				</div>				
+			</div>
+			<div class="col-lg-12 col-md-3 col-sm-3">
+				<div id="imgcont"></div>
+			</div>			
+		</div>		
+	</div>
+
+	<div class="jumbotron text-center footer-page" style="margin-bottom:0">
+	  <p> © 2017 students registration Pvt Ltd </p>
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script>
+			$(document).ready(function()
+			{
+				var filenameObj= {}, dataurl, upFilePath= '',thumbImgFile, thumbImg= [], removeArr= [];
+								
+				$('body').on('keyup', '.studname',function() 
+				{ 
+					this.value = this.value.replace(/[^a-z]/gi, '');
+				});
+				
+				$('body').on('keyup', '.contactnum',function() 
+				{ 
+					this.value = this.value.replace(/[^0-9]/g, '');
+				});
+				$('body').on('click', '.rowdel', function(e)
+				{				
+					e.preventDefault();					
+					var dataObj= {};
+					
+					// alert($('.rowdel').attr('data-rowid'))
+					dataObj['rowid']= $(this).attr('data-rowid');
+					dataObj['funcid']= 1;
+					$('#'+$(this).attr('data-rowid')).remove();					
+					$.ajax(
+					{
+						url: "datapost.php",
+						type: "POST",						
+						data:dataObj,
+						dataType: "html",
+						success: function(html)
+						{
+							createDataTable(html)
+						}
+					});
+				});
+				$('body').on('click', '.datadel', function(e)
+				{
+					e.preventDefault();
+					// alert($(this).attr('data-rowid'));
+					$('#'+$(this).attr('data-rowid')).remove();
+					if($('#studentdatarow tr').length == 0)
+					{
+						refreshInfoFields();
+					}
+				});
+				
+				function createDataTable(data)
+				{
+					// alert()
+					var tableHtml= '', imgHtml= '', imgFiles= '', respData= JSON.parse(data);					
+					if(respData.length == 0)
+					{
+						tableHtml+= '<tr style="text-align:center;"><td colspan="7">No records found.</td></tr>';
+						
+						$('#displaydata').html(tableHtml);						
+						$('#imgcont').html('');						
+						return true;
+					}
+					
+					$.each(respData, function(key, value)
+					{
+						// alert(value)
+						tableHtml+= '<tr id="'+value['slno']+'"><td>'+(key+1)+'</td><td>'+value['batchname']+'</td><td>'+value['name']+'</td><td>'+value['email']+'</td><td>'+value['contactnumber']+'</td><td>'+value['active']+'</td><td><a class="rowdel" href="#" data-rowid="'+value['slno']+'">X</a></td></tr>';
+						
+						if(value['filenames'] != 'empty')
+						{
+							imgFiles+= value['filenames']+',';
+						}						
+					});
+					imgFiles= imgFiles.replace(/,\s*$/, "");					
+					var imgArrTemp= imgFiles.split(',');
+					imgArr = imgArrTemp.filter(
+					 function(a){if (!this[a]) {this[a] = 1; return a;}},
+					 {}
+					);
+					// alert(imgArr)
+					for(i=0; i< imgArr.length; i++)
+					{
+						imgHtml+= '<img class="imageDoc" src="'+imgArr[i]+'" alt="'+imgArr[i]+'.jpg">';
+					}
+					// alert(imgHtml);
+					$('#displaydata').html(tableHtml);
+					if(imgFiles != '')
+					{
+						$('#imgcont').html(imgHtml);
+					}					
+					$('.studname, .email, .contactnum').val('');
+					$('#upfilelist').html('');
+					refreshInfoFields()
+				}
+				/*create image*/
+				function thumb(files) 
+				{		
+					// console.log(files);
+					if (files == null || files == undefined) {			
+						alert("This Browser has no support for HTML5 FileReader yet!");
+						return false;
+					}
+					// alert(Object.keys(files).length)
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+						var imageType = /image.*/;
+						// alert(file.type.match(imageType));
+						if (!file.type.match(imageType)) {
+							continue;
+						}
+
+						var reader = new FileReader();
+
+						if (reader != null) {				
+							reader.onload = GetImage;
+							reader.readAsDataURL(file);
+						}
+
+
+					}
+				}
+				function GetImage(e) 
+				{        
+					// alert(555)
+					var myCan = document.createElement('canvas');
+					var img = new Image();
+					img.src = e.target.result;
+					img.onload = function () {
+
+						myCan.id = "myTempCanvas";
+						var tsize = '500';
+						myCan.width = Number(tsize);
+						myCan.height = Number(tsize);
+						if (myCan.getContext) {
+							var cntxt = myCan.getContext("2d");
+							cntxt.drawImage(img, 0, 0, myCan.width, myCan.height);
+							var dataURL = myCan.toDataURL();
+
+
+							if (dataURL != null && dataURL != undefined) {					
+								var nImg = document.createElement('img');
+								nImg.src = dataURL;
+								nImg.setAttribute("class", "democlass");
+								document.body.appendChild(nImg);
+								$('.democlass').css('display','none');
+							}
+							else
+								alert('unable to get cntxt');
+
+						}
+
+					}
+
+				}
+				function onload()
+				{										
+					$.ajax(
+					{
+						url: "datapost.php",
+						type: "POST",
+						data:{onload:'1'},
+						dataType: "html",
+						success: function(html)
+						{
+							createDataTable(html)
+						}
+					});
+				}
+				function addInfoFields()
+				{
+					$('#studentdatarow').append('<tr id="'+($('#studentdatarow tr').length+1)+'"><td>'+($('#studentdatarow tr').length+1)+')</td><td><label>Student Name :</label><input type="text" class="studname" name="studname" value=""/></td><td><label>Email :</label><input type="text" class="email" name="email" value=""/></td><td><label>Contact Number :</label><input type="text" class="contactnum" name="contactnum" value=""/></td><td><a class="datadel" href="#" data-rowid="'+($('#studentdatarow tr').length+1)+'">X</a></td></tr>');
+				}
+				function refreshInfoFields()
+				{
+					$('#studentdatarow').html('<tr id="1"><td>1)</td><td><label>Student Name :</label><input type="text" class="studname" name="studname" value=""/></td><td><label>Email :</label><input type="text" class="email" name="email" value=""/></td><td><label>Contact Number :</label><input type="text" class="contactnum" name="contactnum" value=""/></td><td><a class="datadel" href="#" data-rowid="1">X</a></td></tr>');
+				}
+				
+				// alert($('#studentdatarow tr').length);
+				if($('#studentdatarow tr').length == 0)
+				{
+					refreshInfoFields();
+					onload();
+				}
+				$('#addData').click(function()
+				{
+					addInfoFields();
+				});
+				
+				$('input[type=file]').change(function () 
+				{					
+					var fileListHtml= '';
+					$.each(this.files,function(i,f)
+					{
+						// alert(f.name);			
+						var str= f.name+'<a class="attchremove" data-remove='+f.name+' href="#"><i class="fa fa-close"></i></a>, ';						
+						upFilePath+= f.name+',';
+						fileListHtml+= '<p data-remove="'+f.name+'">'+('-')+')'+f.name+'<span class="filedel">X</span></p>';
+					});
+					$('#upfilelist').html(fileListHtml);
+					thumbImgFile= thumb(this.files);
+					$('input[type=file]').val('');
+				});
+				$('body').on('click', '.filedel', function()
+				{
+					removeArr.push($(this).closest('p').attr('data-remove'));
+					$(this).closest('p').remove();		
+				});
+				$('body').on('click','input[type=file]',function()
+				{					
+					removeArr= [];
+					$('.democlass').remove();
+					upFilePath= '';
+				});
+				$('.submit').on('click', function()
+				{
+					var studentDataArr= [], bodyDataObj= {};
+					thumbImg= [];
+					var regexemail= /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+					if($('.email').val() == '' || $('.studname').val() == '' || $('.contactnum').val() == '')
+					{
+						alert('Fields Cannot be empty.');return false;
+					}
+					if (!$('.email').val().match(regexemail)) 
+					{
+						alert('Invalid Email Address.');
+						return false;
+					}
+
+					$( ".democlass" ).each(function()
+					{
+						// alert($(this).attr('src'));
+						thumbImg.push($(this).attr('src'));
+					});
+					$("#studentdatarow tr").each(function() 
+					{
+						// alert($(this).find("td").eq(0).find('input').val());
+						// alert($(this).find().val());
+						var studentDataObj= {};
+						
+						studentDataObj['name']= $(this).find("td").eq(1).find('input').val();
+						studentDataObj['email']= $(this).find("td").eq(2).find('input').val();
+						studentDataObj['contnum']= $(this).find("td").eq(3).find('input').val();
+						studentDataArr.push(studentDataObj);
+						// alert(studentDataObj.toSource());
+					});
+					bodyDataObj['batchname']= $("#batchname option:selected").text();
+					bodyDataObj['removefile']= removeArr;
+					bodyDataObj['studata']= studentDataArr;
+					// alert(upFilePath);return;
+					upFilePath= upFilePath.replace(/,\s*$/, "");
+					if(upFilePath == '')
+					{
+						upFilePath= 'empty';
+					}
+					bodyDataObj['phtouplod']= upFilePath;					
+					var form_data = new FormData();	 	
+					form_data.append("bodydataobj", JSON.stringify(bodyDataObj)) 
+					form_data.append("imgsrc", JSON.stringify( thumbImg ));
+					
+					
+					// bodyDataObj['filenames']= formData;
+					// alert(thumbImg.length)
+					
+					$.ajax(
+					{
+						url: "datapost.php",
+						type: "POST",
+						// data: formdata,
+						processData: false,
+						contentType: false,
+						data:form_data,
+						dataType: "html",
+						success: function(html)
+						{
+							createDataTable(html)
+						}
+					});
+				});
+			});
+		</script>
+
+</body>
+</html>

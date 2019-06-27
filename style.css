@@ -1,0 +1,81 @@
+.filedel{color:red;}
+.datadel{color:red;}
+.datadel a{text-decoration:none;}
+.rowdel{color:red;}
+.rowdel a{text-decoration:none;}
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+/* #datatable, #datatable tr th, #datatable tr td{border-collapse: collapse;border:1px solid black;}
+#table-cont{height:100%;width:60%;}
+#datatable thead, tbody { display: block; width: 100%;}
+
+#datatable tbody{height: 175px; overflow-y: auto; overflow-x: auto;}
+#datatable thead {overflow-y: auto; overflow-x: auto;}
+#datatable td{padding:10px; overflow: hidden;word-wrap: break-word;text-align: center; vertical-align: middle;} */
+
+/* #datatable thead, tbody { display: block;}
+#datatable tbody{height: 175px; overflow-y: auto; overflow-x: auto;}*/
+#datatable td{overflow: hidden;word-wrap: break-word;text-align: center; vertical-align: middle;} 
+#datatable  tr td{
+  border-collapse: collapse;
+  border: 1px solid black;
+} 
+
+#datatable th,#datatable td {
+  border: 1px solid black;
+}
+
+#datatable.a {
+  table-layout: auto;
+  width: 180px;  
+}
+
+#datatable.b {
+  table-layout: fixed;
+  width: 180px;  
+}
+
+#datatable.c {
+  table-layout: auto;
+  width: 100%;  
+}
+
+#datatable.d {
+  table-layout: fixed;
+  width: 100%;  
+}
+
+#datatable tbody {
+    display:block;
+    height:175px;
+    overflow:auto;
+}
+#datatable thead,#datatable tbody tr {
+    display:table;
+    width:100%;
+    table-layout:fixed;
+}
+#datatable thead {
+    width: calc( 100% - 1em);
+}
+#datatable {
+    width:400px;
+}
+body{background-image: url(backimg.jpg);}
+.logo-img-load{background-color: rgba(6, 144, 203, 0.79) !important;}
+.footer-page{background-color: rgba(6, 144, 203, 0.79) !important;}
+.imageDoc {
+    display: inline-block;
+    width: 14%;
+    height: 14%;
+	padding:10px;
+}
+
